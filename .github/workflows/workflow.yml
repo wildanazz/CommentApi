@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "main"
+  workflow_dispatch:
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install doctl CLI
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Build a container image
+        run: docker build -t ${{ secrets.REGISTRY_NAME }}/comment-api:$(echo $GITHUB_SHA | head -c7) .
+      - name: Log in to DigitalOcean Container Registry with short-lived credentials
+        run: doctl registry login --expiry-seconds 1200
+      - name: Remove all old images from DigitalOcean Container Registry
+        run: if [ ! -z "$(doctl registry repository list | grep "comment-api")" ]; then doctl registry repository delete-manifest comment-api $(doctl registry repository list-tags comment-api | grep -o "sha.*") --force; else echo "No repository"; fi
+      - name: Push the image to DigitalOcean Container Registry
+        run: docker push ${{ secrets.REGISTRY_NAME }}/comment-api:$(echo $GITHUB_SHA | head -c7)
