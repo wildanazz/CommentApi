@@ -12,8 +12,12 @@ jobs:
     steps:
       - name: Update Docker settings
         run: |
-          sudo sed -i 's/ }/, \"max-concurrent-uploads\": 2 }/' /etc/docker/daemon.json
-          sudo systemctl restart docker
+          if [ -f /etc/docker/daemon.json ]; then
+            sudo sed -i 's/ }/, \"max-concurrent-uploads\": 2 }/' /etc/docker/daemon.json
+            sudo systemctl restart docker
+          else
+            echo "/etc/docker/daemon.json does not exist."
+          fi
       - name: Checkout
         uses: actions/checkout@v3
       - name: Install doctl CLI
@@ -25,6 +29,13 @@ jobs:
       - name: Log in to DigitalOcean Container Registry with short-lived credentials
         run: doctl registry login --expiry-seconds 1200
       - name: Remove all old images from DigitalOcean Container Registry
-        run: if [ ! -z "$(doctl registry repository list | grep "comment-api")" ]; then doctl registry repository delete-manifest comment-api $(doctl registry repository list-tags comment-api | grep -o "sha.*") --force; else echo "No repository"; fi
+        run: |
+          REPO_NAME="comment-api"
+          IMAGE_TAGS=$(doctl registry repository list-tags $REPO_NAME | grep -o "sha.*" | tr -d '[:space:]')
+          if [ ! -z "$IMAGE_TAGS" ]; then
+            doctl registry repository delete-manifest $REPO_NAME $IMAGE_TAGS --force
+          else
+            echo "No images to remove from registry."
+          fi
       - name: Push the image to DigitalOcean Container Registry
         run: docker push ${{ secrets.REGISTRY_NAME }}/comment-api:$(echo $GITHUB_SHA | head -c7)
