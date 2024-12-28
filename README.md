@@ -138,4 +138,8 @@ Deletes a specific comment by ID.
 - The main configuration file is `appsettings.json` where you can configure MongoDB connection strings and other environment-specific settings.
 - For development configurations, you can use `appsettings.Development.json`.
 
+## Todo
+
+- Create endpoint for comment on each article.
+
 ---
