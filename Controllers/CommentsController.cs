@@ -31,6 +31,8 @@ public class CommentsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Post(Comment newComment)
     {
+        newComment.CreatedAt = DateTime.UtcNow;
+
         await _commentsService.CreateAsync(newComment);
 
         return CreatedAtAction(nameof(Get), new { id = newComment.Id }, newComment);
@@ -47,6 +49,8 @@ public class CommentsController : ControllerBase
         }
 
         updatedComment.Id = comment.Id;
+
+        updatedComment.UpdatedAt = DateTime.UtcNow;
 
         await _commentsService.UpdateAsync(id, updatedComment);
 

@@ -15,4 +15,12 @@ public class Comment
     [BsonElement("Comment")]
     [JsonPropertyName("Comment")]
     public string Description { get; set; } = null!;
+
+    [BsonElement("CreatedAt")]
+    [JsonPropertyName("CreatedAt")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    [BsonElement("UpdatedAt")]
+    [JsonPropertyName("UpdatedAt")]
+    public DateTime? UpdatedAt { get; set; }
 }
