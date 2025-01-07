@@ -140,6 +140,7 @@ Deletes a specific comment by ID.
 
 ## Todo
 
-- Create endpoint for comment on each article.
+- Add reCAPTCHA middleware.
+- Create endpoint for comment section on each article.
 
 ---
